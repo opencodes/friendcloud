@@ -14,7 +14,7 @@ module.exports = function (app) {
   });
   app.post('/login/',main.login);
   require('./users')(app); 
- 
+  require('./fcloud')(app); 
   /*app.get('/*', function (req, res) {
     var accept = req.headers.accept || '';
       if (~accept.indexOf('html')) {
