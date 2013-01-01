@@ -2,7 +2,7 @@
 var util = require('util');
 var main = require('./main');
 module.exports = function (app) {
-  app.get('/', main.auth, function(req, res){
+  app.get('/', function(req, res){
     res.render('index.ejs',         { title: 'Home Page' });
   });
   app.get('/login/', function(req, res){

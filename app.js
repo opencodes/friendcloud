@@ -15,7 +15,7 @@ app.configure(function(){
   
 });
 
-app.use(main.auth);
+//app.use(main.auth);
 require('./routes')(app);
 console.log("Server listening on port " + config.port+" url : "+config.host+":"+config.port );
 
