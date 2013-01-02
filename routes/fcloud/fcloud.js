@@ -19,8 +19,10 @@ var fclouds = {
 			Profile.select(filters,function(err,result){
 				
 				if(!err && res){
-					console.log(result);
-					res.json(result);
+					profiles.items = result;
+					res.header('Content-Type', 'application/json');
+					res.header('Charset', 'utf-8') ;
+					res.send(req.query.callback + '('+JSON.stringify(profiles)+');');  
 				}else{
 					console.log(err);
 					res.json({'error':'No result'});
