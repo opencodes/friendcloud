@@ -3,17 +3,18 @@ var util = require('util');
 var Model = require('./model');
 
 function Profiles() {
-  Model.call(this, 'profile');
+  Model.call(this, 'profile_list');
 }
 
 util.inherits(Profiles, Model);
 
 var Profile = new Profiles();
-Profile.all = function(data,cb){  
+
+Profile.all = function(cb){  
     var filters = {
-        'token': data.publickkey
+        'status': '1'
     };
-      User.select(filters, function (err, rows) {
+    Profile.select(filters, function (err, rows) {
         if (!err && rows) {
           cb(null, rows);
         } else {
