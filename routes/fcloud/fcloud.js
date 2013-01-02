@@ -13,14 +13,16 @@ var fclouds = {
 		},
 		list : function(req,res){
 			var filters = {
-					'token':req.query.publickey
+					'token':0
 			};
 			var profiles = {};
 			Profile.select(filters,function(err,result){
 				
 				if(!err && res){
+					console.log(result);
 					res.json(result);
 				}else{
+					console.log(err);
 					res.json({'error':'No result'});
 				}
 			});

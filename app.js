@@ -12,7 +12,7 @@ app.configure(function(){
   app.use(express.bodyParser());
   app.use(express.cookieParser());
   app.use(express.session({ secret: "asd43g84webe88d38", store: new RedisStore }));
-  
+  app.use(express.errorHandler({dumpExceptions:true,showStack:true}));
 });
 
 //app.use(main.auth);
