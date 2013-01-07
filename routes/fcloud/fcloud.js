@@ -6,7 +6,7 @@ var Friend = require('../../models/fcloud/friend');
 var Notification = require('../../models/fcloud/notification');
 var Group = require('../../models/fcloud/group');
 var Contacts = require('../../models/fcloud/contacts');
-var Position = require('../../models/fcloud/contacts');
+var Position = require('../../models/fcloud/position');
 
 var fclouds = {
 		info : function(req,res,next){
