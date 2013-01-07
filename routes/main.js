@@ -31,6 +31,10 @@ var main = {
           });
         }
       }
+    },
+    log : function(req,res,next){
+    	util.log(util.inspect(req.method +':'+req.url));
+    	next();
     }
     
 };
