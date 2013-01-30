@@ -10,11 +10,13 @@ util.inherits(Friends, Model);
 
 var Friend = new Friends();
 
-Friend.all = function(cb){  
+Friend.by_profile_id = function(id,cb){  
     var filters = {
         'status': '1'
     };
-    Friend.select(filters, function (err, rows) {
+    var sql = 'pl.id, pl.name, pl.photo  FROM `friend` INNER JOIN profile_list as pl ON pl.id = friend.friend_id'+
+    		+' WHERE friend.profile_id = "1";';	
+    Friend.select(null,{columns:sql,countRows:true}, function (err, rows) {
         if (!err && rows) {
           cb(null, rows);
         } else {
@@ -22,6 +24,7 @@ Friend.all = function(cb){
         }
       });
 };
+
 Friend.add = function(data,callback){  
 	Friend.insert(data,function(err,result){
 	    if(err)

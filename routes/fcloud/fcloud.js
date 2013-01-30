@@ -7,10 +7,16 @@ var Notification = require('../../models/fcloud/notification');
 var Group = require('../../models/fcloud/group');
 var Contacts = require('../../models/fcloud/contacts');
 var Position = require('../../models/fcloud/position');
+var Posts = require('../../models/fcloud/posts');
 
 var fclouds = {
+		/**
+		 * Load user information 
+		 * @param req
+		 * @param res
+		 * @param next
+		 */
 		info : function(req,res,next){
-			console.log(req.query);
 			if(req.query.publickey){
 				var filters = {'public_key':req.query.publickey};
 				Profile.select(filters,function(err,result){
@@ -18,7 +24,7 @@ var fclouds = {
 						if(result.length !==1){
 							fclouds.registerdevice(req,res,next);
 						}else {
-							req.profile = {profile:result[0]};
+							req.profile = result[0];
 							next();
 						}
 						
@@ -32,12 +38,39 @@ var fclouds = {
 				res.json({'error':'Unauthorized Access'});
 			}
 		},
+		friendlist : function(req,res,next){
+			if(req.profile.id){
+				var profile_id = req.profile.id;
+				Friend.by_profile_id(profile_id,function(err,result){
+					if(!err && result){
+							req.profile.friends = result;
+							next();				
+						
+					}else{
+						console.log(err);
+						res.json({'error':'Unauthorized Access'});
+					}
+				});
+			}
+		},
+		/**
+		 * Fetching user profile
+		 * @param req
+		 * @param res
+		 */
 		profile : function(req,res){
 			var profile = req.profile;
+			console.log(profile);
 			res.header('Content-Type', 'application/json');
 			res.header('Charset', 'utf-8') ;
 			res.send(req.query.callback + '('+JSON.stringify(profile)+');');  
 		},
+		/**
+		 * Register Device
+		 * @param req
+		 * @param res
+		 * @param next
+		 */
 		registerdevice :function(req,res,next){
 			var data = {
 					'public_key':req.query.publickey,
@@ -51,6 +84,11 @@ var fclouds = {
 				}
 			});
 		},
+		/**
+		 * Save Contacts
+		 * @param req
+		 * @param res
+		 */
 		savecontacts : function(req,res){
 			var contacts = JSON.parse(req.query.contacts);
 			var data = [];
@@ -94,6 +132,11 @@ var fclouds = {
 			});
 			
 		},
+		/**
+		 * Save Position
+		 * @param req
+		 * @param res
+		 */
 		saveposition: function(req,res){
 			var position = JSON.parse(req.query.position);
 			var data = {
@@ -120,6 +163,11 @@ var fclouds = {
 			});	
 			
 		},
+		/**
+		 * List friends
+		 * @param req
+		 * @param res
+		 */
 		list : function(req,res){
 			console.log(req.query);
 			var filters = {
@@ -140,6 +188,11 @@ var fclouds = {
 			});
 			
 		},
+		/**
+		 * Fetch Profile Details
+		 * @param req
+		 * @param res
+		 */
 		detail : function(req,res){
 			var profileid = req.query.profile_id;
 			var profiles = {};
@@ -155,14 +208,47 @@ var fclouds = {
 				}
 			});
 		},
-		traceme : function(req,res){
+		/**
+		 * Fetch profile info
+		 * @param req
+		 * @param res
+		 * @param next
+		 */
+		fetchinfo : function(req,res,next){
 			var trace_friend_id = req.query.friend_id;
-			var user_id = 1;
-			var data = {'profile_id':1,'friend_id':trace_friend_id};
+			var profile_id = req.query.profile_id;
+			var ids = [profile_id,trace_friend_id];
+			ProfileDetails.byId(ids,function(err,result){
+				if(!err && res){
+						
+					for(var k in result){
+						if(result[k].id == profile_id){
+							req.profile = result[k];
+						}
+						if(result[k].id == trace_friend_id){
+							req.friend = result[k];
+						}
+					}
+				}else{
+					console.log(err);
+				}
+				next();
+			});
+		},
+		/**
+		 * Trace Me
+		 * @param req
+		 * @param res
+		 */
+		traceme : function(req,res){
+			console.log(req.profiles);
+			var friend = req.friend;
+			var profile = req.profile;
+			var data = {'profile_id':profile.id,'friend_id':friend.id};
 			Friend.add(data,function(err,result){
 				if(!err && res){
-					var notification = [{'user_id':user_id,'msg':'Request sent to user '+trace_friend_id,'type':'1'},
-					                    {'user_id':trace_friend_id,'msg':'Invitation from  user'+user_id,'type':'1'}];
+					var notification = [{'user_id':profile.id,'msg':'Request sent to  '+friend.name,'type':'1'},
+					                    {'user_id':friend.id,'msg':profile.name+' wants to be friends with you on Traceme ','type':'1'}];
 					Notification.add(notification,function(err,result){
 						if(!err && res){
 						res.header('Content-Type', 'application/json');
@@ -179,6 +265,26 @@ var fclouds = {
 					res.json(req.query.callback + '('+'{"error":"No result"}'+');');
 				}
 			});
+		},
+		posts : function(req,res){
+			console.log(req.query);
+			var filters = {
+					'status':'1',
+			};
+			var posts = {};
+			Posts.all(function(err,result){
+				//console.log(result);
+				if(!err && result){
+					posts.items = result;
+					res.header('Content-Type', 'application/json');
+					res.header('Charset', 'utf-8') ;
+					res.send(req.query.callback + '('+JSON.stringify(posts)+');');  
+				}else{
+					console.log(err);
+					res.json(req.query.callback + '('+'{"error":"No result"}'+');');
+				}
+			});
 		}
+		
 };
 module.exports = fclouds;
